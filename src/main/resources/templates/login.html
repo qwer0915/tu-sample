@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Login</title>
+</head>
+
+<body>
+	<div class="login-box">
+		<h2>Login</h2>
+		<input type="text" id="user_id" placeholder="Submit ID">
+		<input type="password" id="user_pw" placeholder="Submit PW">
+		<button id="login_btn">Login</button>
+		<div id="login_msg"> </div>
+	</div>
+	<!--로그인 상태시 로그인 불가-->
+	
+	
+	<script>
+
+		function setCookie(name, value, days) {
+			console.log('쿠키 생성');
+			let expires = "";
+			if (days) {
+				const date = new Date();
+				date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000); // 밀리초 단위로 설정
+				expires = "; expires=" + date.toUTCString();
+			}
+			document.cookie = name + "=" + encodeURIComponent(value) + expires + "; path=/";
+		}
+		// login_btn click -> Rest request 
+		document.getElementById('login_btn').addEventListener('click', function () {
+			const user_id = document.getElementById('user_id').value;
+			const user_pw = document.getElementById('user_pw').value;
+
+			console.log(user_id, user_pw);
+
+			if (!user_id || !user_pw) {
+				document.getElementById('login_msg').innerHTML = 'PLEASE SUBMIN AND ENTER ID OR PW';
+				return false;
+			}
+			
+			//Server 
+			var xhr = new XMLHttpRequest();
+			xhr.open('POST', '/rest/request-login');
+			xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+			
+			xhr.onreadystatechange = function () {
+				if (xhr.readyState == XMLHttpRequest.DONE) {
+					if (xhr.status == 200) {
+						const result = JSON.parse(xhr.responseText);
+						if (result.REPL_CD != '0000'){
+							document.getElementById('login_msg').innerHTML =result.REPL_PAGE_MSG;
+							
+						}
+						else {
+							document.getElementById('login_msg').innerHTML = JSON.stringify(result.memberinfo);
+							setCookie('userId',result.memberinfo.ID);
+							window.location.href ='/home';
+						}
+						
+					} // ERROR 404,500, 권한 302,303
+					else {
+
+					}
+				}
+			};
+			 // id,pw JSON 
+			 const data = JSON.stringify({
+			 				"userId" : user_id,
+			 				"userPw" : user_pw
+			 			});
+						xhr.send(data);	
+		});
+	</script>
+
+</body>
+
+</html>
