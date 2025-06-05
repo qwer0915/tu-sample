@@ -15,7 +15,10 @@
 		<div id="login_msg"> </div>
 	</div>
 	<!--로그인 상태시 로그인 불가-->
-	
+	<script th:if="${session.userId !=null}">
+		alert("STATE LOGIN");
+		window.location.href ='/home';
+	</script>
 	
 	<script>
 
